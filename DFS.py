@@ -4,16 +4,11 @@ from geopy.distance import geodesic
 from flask import Flask, render_template, request
 import decimal
 import plot_map
+from wordfreq import inspect
 
-
-
-# gmaps = googlemaps.Client(key='AIzaSyCHBJ-P1Gx7uCNVldHyJHcADwSy4Zgh--8')
 
 app = Flask(__name__)
-# GoogleMaps(
-#     app,
-#     key="AIzaSyCHBJ-P1Gx7uCNVldHyJHcADwSy4Zgh--8"
-# )
+
 
 class Graph:
 
