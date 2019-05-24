@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<head>
+    <title>
+        Algo Assignment
+    </title>
+<script type="text/javascript"src="https://code.jquery.com/jquery3.3.1.js"></script>
+</head>
+<table class="table" border = 1>
+     <tr>
+        <th>Route</th>
+        <th>Distance (km)</th>
+  </tr>
+    {% for key, value in path_travel %}
+
+    <tr>
+        <td> {{ value }} </td>
+        <td> {{ key }} </td>
+    </tr>
+    {% endfor %}
+
+</table>
+

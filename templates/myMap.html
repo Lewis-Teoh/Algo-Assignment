@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Algo Assignment
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='design.css') }}">
+
+
+
+</head>
+
+
+<body>
+
+<div class="container">
+    <iframe class="embed-responsive-item" width="80%" height="720" frameborder="0" style="border:0"
+            src="{{ url_for('static', filename='map.html') }}"></iframe>
+</div>
+<form method="POST" action="/">
+    <div class="form-group">
+        <label>From :</label>
+        <input class="form-control"
+               placeholder="Kuala Lumpur International Airport 2(KLIA2)" disabled>
+    </div>
+    <div class="form-group">
+        <label>To your destination:</label>
+        <select class="form-control" style="width: 50%" name="destination">
+            {% for airport in airports %}
+            <option value={{loop.index}}>{{airport}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button id="submitShowMap" type="submit" class="btn btn-primary">Submit
+    </button>
+
+
+</form>
+
+<div>
+    <table class="table table-striped">
+
+        <thead>
+        <tr>
+            <th scope="col">Ways</th>
+            <th scope="col">Route</th>
+            <th scope="col">Distance (km)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in path_travel %}
+        <tr>
+
+            <td> {{ loop.index }}</td>
+            <td> {{ value }}</td>
+            <td> {{ key }}</td>
+        </tr>
+        {% endfor %}
+        <tbody>
+    </table>
+</div>
+<div class="container">
+
+    <iframe id="dynamic_map" class="embed-responsive-item" width="80%" height="720" frameborder="0" style="border:0 "
+            src="{{ url_for('static', filename='dynamic_map.html', _=current_time ) }}"></iframe>
+</div>
+
+</body>
+
+</html>
