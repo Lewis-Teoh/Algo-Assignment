@@ -1,34 +1,20 @@
+from plistlib import Data
 from urllib.request import urlopen
-import obo 
+
+from plotly.graph_objs._figure import Figure
+
+import obo
 import plotly
 import plotly.plotly as py
-import plotly.graph_objs as go 
 import os 
 import time
 from shutil import copyfile
+
+
+import plotly.graph_objs as go
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+
 import project
-
-
-
-
-def worddict(string):
-    wordlist = string.split()
-    wordfreq = []
-    for w in wordlist:
-        wordfreq.append(wordlist.count(w))
-    result = dict(set(zip(wordlist,wordfreq)))
-    return result
-    # for key in result:
-    #     print(key)
-
-# def wordlistotfrewdict(wordlist):
-#     wordfreq = 
-    
-def sortdict(freqdict):
-    aux = [[freqdict[key],key] for key in freqdict]
-    print(type(aux)) #list
-    return aux
-
 
 # import plotly.plotly as py
 # from plotly.graph_objs import *
@@ -51,16 +37,13 @@ def plotgraph(word,frequency):
     fig = Figure(data=data,layout =layout)
     plot_url = py.plot(fig)
 
-def plotoffline(word,frequency,image_filename):
-    img_name = image_filename
-    dload = os.path.expanduser('~/Downloads')
-    save_dir = '/tmp'
 
-    data = [go.Bar(x = word, y = frequency)]
-    plotly.offline.plot(data,image_filename= img_name,image = 'png')
-    time.sleep(1)
-    copyfile('{}/{}.png'.format(dload, img_name),
-         '{}/{}.png'.format(save_dir, img_name))
+def plotlj(word,frequency,name):
+    plot([go.Scatter(x=word, y=frequency)], filename=name)
+
+def piepie(labels,frequency,name):
+    plot([go.Pie(labels=labels, values=frequency)], filename=name)
+
 
 def plotpie(inputtype,percentage,image_filename):
     img_name = image_filename
@@ -76,120 +59,65 @@ def plotpie(inputtype,percentage,image_filename):
          '{}/{}.png'.format(save_dir, img_name))
 
 def inspect(text):
-    result = obo.checkstopword(text)
+    result = obo.check_stopword(text)
+    print(result)
     # plotoffline(result[1],result[2],'Stopword')
 
     text = result[0]
-    
-
     pdata = obo.pdata(text,obo.positive_word)
-    print(pdata)
+    # print(pdata)
     # plotoffline(pdata[0],pdata[1],"Positive word Encountered.")
 
     ndata = obo.ndata(text,obo.negative_word)
-    print(ndata)
+    # print(ndata)
     # plotoffline(ndata[0],ndata[1],"Negative word Encountered.")
 
-    output = obo.countsentiment(text,obo.positive_word,obo.negative_word)
-    print(output)
-    sentiment_score = output[3]
+    output = obo.countsentiment(text)
+    return output
+    # sentiment_score = output[2]
     # plotpie(output[0],output[1],"Sentiment assesment")
 
     # print(obo.countsentiment(text,obo.positive_word,obo.negative_word))
- 
+
+def get_nation(country):
+    print("god sia")
+    nation = country+".txt"
+    text = open(nation, "r")
+    text = text.read()
+    return inspect(text)
 
 
-if __name__=="__main__":
+def plotting(text):
+    result = obo.checkstopword(text)
+    plotoffline(result[1],result[2],'ChinaStop')
 
-    text = "Had you any occasion to be in this part of the town, on the 6th of June in the evening? - I dined with my brother who lives opposite Mr. Akerman's house. They attacked Mr. Akerman's house precisely at seven o'clock; they were preceded by a man better dressed than the rest,\
-         who went up to Mr. Akerman's door; he rapped three times, and I believe pulled the bell as often. Mr. Akerman had barrocadoed his house. When the man found that no one came, he went down the steps, made his obeisance to the mob, and pointed to the door, and then retired."
-
-
-    indonesia = open("indonesia.txt","r")
-    indonesia = indonesia.readlines()
-    # inspect(indonesia)
-
-    singapore = open("singapore.txt","r")
-    singapore = singapore.readlines()
-    # inspect(singapore)
-
-    australia = open("australia.txt","r",)
-    australia = australia.readlines()
-    # inspect(australia)
-
-
-    hongkong = open("hongkong.txt","r",)
-    hongkong = hongkong.read()
-    # inspect(hongkong)
-
-    china = open("china.txt","r")
-    china = china.read()
-    inspect(china)
-    
-
-    # result = obo.checkstopword(text)
-    # # plotoffline(result[1],result[2],'Stopword')
-
-    # text = result[0]
-    # test = obo.wordcounter(text,obo.positive_word)
-    # print(test)
-
-    # pdata = obo.pdata(text,obo.positive_word)
+    text = result[0]
+    pdata = obo.pdata(text, obo.positive_word)
     # print(pdata)
-    # # plotoffline(pdata[0],pdata[1],"Positive word Encountered.")
+    plotoffline(pdata[0],pdata[1],"ChinaPositive")
 
-    # ndata = obo.ndata(text,obo.negative_word)
+    ndata = obo.ndata(text, obo.negative_word)
     # print(ndata)
-    # # plotoffline(ndata[0],ndata[1],"Negative word Encountered.")
+    plotoffline(ndata[0],ndata[1],"ChinaNegative")
 
-    # output = obo.countsentiment(text,obo.positive_word,obo.negative_word)
-    # print(output)
-    # sentiment_score = output[3]
-    # plotpie(output[0],output[1],"Sentiment assesment")
-    # print(obo.countsentiment(text,obo.positive_word,obo.negative_word))
+    output = obo.countsentiment(text, obo.positive_word, obo.negative_word)
+    plotpie(output[0],output[1],"ChinaSentiment")
 
+    # sentiment_score = output[2]
+    # print(obo.countsentiment(text,obo.positive_word,obo.negative_word)
 
-    # for s in sorteddict:
-        # print(str(s))
-    
-    # print(wordlist)
-    # print(obo.countsentiment(wordlist,obo.positive_word,obo.negative_word))
-    
-    # temp = ['helloattack','lives','door','well','more','believe']
-    # print(obo.countsentiment(temp,obo.positive_word,obo.negative_word))
-    # string = ' '.join(wordlist)
-    # # print(string,type(string))
-    # print(project.wordcounter(string,obo.positive_word))
+if __name__ == "__main__":
 
-    # print()
-
-    # print(type(sorteddict),len(sorteddict))
-    # print(stopfound)
-    # word,wordfreq  = obo.countword(wordlist)
-    # counting = obo.countword(wordlist,obo.positive_word)
-    # positivefound,positive_freq = counting[0],counting[1]
-    # ptotal = counttotal(positive_freq)
-    # negativecounting= obo.countword(wordlist,obo.negative_word)
-    # negativefound,negative_freq = negativecounting[0],negativecounting[1]
-    # ntotal = counttotal(negative_freq)
-    # print(obo.negative_word)
-  
-    # print("Positive value found:",positivefound)
-    # print(positive_freq,"Frequency of positive value: ",ptotal)
-    # print("Negative value found:",negativefound)
-    # print(negative_freq,"Frequency of negative vlaue: ",ntotal)
-    # positive = open("positive.txt","r")
-    # positive_word = positive.read().split(',') #list of positive word
-    # negative = open ("negative.txt","r")
-    # negative_word = negative.read().split(',')
-    
+    # get_nation("japan")
+    china = open("australia.txt","r")    #change the name
+    china = china.read()
+    result = obo.check_stopword(china)
+    freq = obo.pie(result[0])
+    piepie(['Positive Word','Negative Word','Neutral Word'],freq,'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/PieAustralia')    #change h
+    # plotlj(result[1], result[2],'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/SChina')
+    # positivecounting = obo.wordcounter(result[0], obo.positive_dict)
+    # plotlj(positivecounting[0], positivecounting[1],'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/PChina')
+    # negativecounting = obo.wordcounter(result[0],obo.negative_dict)
+    # plotlj(negativecounting[0],positivecounting[1],'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/NChina')
 
 
-    # plotgraph(word,wordfreq)
-    # new_positive  = obo.processpositive(obo.positive)
-    # new_negative = obo.processnegative(obo.negative)
-    # plotoffline(word,wordfreq,'stopwordfound?')
-    # a = "-what"
-    # a = a.replace("-",',')
-    # print(new_negative)
-    # print(new_positive)

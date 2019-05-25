@@ -11,143 +11,173 @@ import re
 
 
 
+import re
 
+def multiple_pattern_hashing_rabin_karp(pattern, d):
+    pat = len(pattern)
+    pattern_dict = {}
+    for i in range(pat):
+        p = 0
+        word = pattern[i]
+        wordsize = len(word)
+        for j in range(wordsize):
+            p = (d * p + ord(word[j]))
+            if j == wordsize-1:
+                pattern_dict[p] = word+"end"
+            else:
+                if p not in pattern_dict:
+                    pattern_dict[p] = word[0:j+1]+"not"
+    return pattern_dict
+
+#trasforming positive word to a dict for checking
 positive = open("positive.txt","r")
 positive_word = positive.read().split(',') #list of positive word
+positive_dict = multiple_pattern_hashing_rabin_karp(positive_word, 256)
+
+#trasforming negative word to a dict for checking
 negative = open ("negative.txt","r")
 negative_word = negative.read().split(',') #list of negative word
+negative_dict = multiple_pattern_hashing_rabin_karp(negative_word, 256)
 
+#trasforming stop word to a dict for checking
+file = open(r"C:\Users\lewis\PycharmProjects\AlgoAssignment\stop word.txt", "r")  # NEED to change directory
+stop_word = []
+for line in file:
+    stopword = re.sub("\s{1,}", "", line)  #because reading the line, so i need to remove whitespace behind
+    stop_word.append(stopword)
+stop_word_dict = multiple_pattern_hashing_rabin_karp(stop_word, 256)
 
-def search(text, pattern, d, q):
-    n = len(text)
-    m = len(pattern)
-    h = pow(d, m - 1) % q
-    p = 0
+def multiple_pattern_matching_rabin_karp(text, pattern_dict, d):
+    size = len(text)
+    match_dict = {}
     t = 0
-    result = []
-    if n == 0 or m > n:
-        return result
-
-    for i in range(m):  # preprocessing
-        p = (d * p + ord(pattern[i])) % q
-        t = (d * t + ord(text[i])) % q
-    for s in range(n - m + 1):  # note the +1
-        if p == t:  # check character by character
-            match = True
-            for i in range(m):
-                if pattern[i] != text[s + i]:
-                    match = False
+    i = 0
+    while i < size:
+        if t in pattern_dict:
+            if text[i] == " ":
+                current = pattern_dict.get(t)
+                c = len(current)
+                word = current[0:c-3]
+                h = current[c-3:c]
+                if h == "end":
+                    if word in match_dict:
+                        frequency = match_dict.get(word)
+                        match_dict[word] = frequency + 1
+                    else:
+                        match_dict[word] = 1
+                t = 0
+            elif i == size-1:
+                t = (d * t + ord(text[i]))
+                current = pattern_dict.get(t)
+                c = len(current)
+                word = current[0:c - 3]
+                h = current[c - 3:c]
+                if h == "end":
+                    if word in match_dict:
+                        frequency = match_dict.get(word)
+                        match_dict[word] = frequency + 1
+                    else:
+                        match_dict[word] = 1
+            else:
+                t = (d * t + ord(text[i]))
+        elif text[i] is " ":
+            t = 0
+        elif t == 0:
+            t = (d * t + ord(text[i]))
+        else:
+            while i != size:
+                if text[i] != " ":
+                    i+=1
+                else:
+                    t=0
                     break
-            if match:
-                result = result + [s]
-        if s < n - m:
-            t = (t - h * ord(text[s])) % q  # remove letter s
-            t = (t * d + ord(text[s + m])) % q  # add letter s+m
-            t = (t + q) % q  # make sure that t >= 0
-    return result
+        i += 1
+    return match_dict.keys(), match_dict.values()
 
-
-def removeDash(text, list):
-    s = 1
-    t = len(text)
-    sum = 0
-    for i in range(len(list)):
-        current_index = int(list[i])
-        if current_index == 0:
-            if text[current_index+s] == " ":
-                slice = text[s+1:t]
-                text = slice
-                sum+=1
-        elif current_index + s == len(text):
-            if text[current_index-1] == " ":
-                slice = text[0:current_index-1]
-                text = slice
-                sum+=1
+def remove_stopword(stopword_dict, text, d):
+    s = len(text)
+    start_index = 0
+    match_dict = {}
+    t=0
+    i=0
+    while True:
+        s = len(text)
+        if start_index >= s or i >= s:
+            break;
+        if i >= s - 1:
+            t = (d * t + ord(text[i]))
+            if t in stopword_dict:
+                current = stopword_dict.get(t)
+                c = len(current)
+                word = current[0:c - 3]
+                h = current[c - 3:c]
+                if h == "end":
+                    # if isMatch(text, word, i):
+                    if word in match_dict:
+                        frequency = match_dict.get(word)
+                        match_dict[word] = frequency + 1
+                    else:
+                        match_dict[word] = 1
+                    slice = text[0:start_index - 1]
+                    start_index = s
+                    text = slice
+        elif t in stopword_dict:
+            if text[i] == " ":
+                current = stopword_dict.get(t)
+                c = len(current)
+                word = current[0:c - 3]
+                h = current[c - 3:c]
+                if h == "end":
+                    # if isMatch(text, word, i):
+                    if word in match_dict:
+                        frequency = match_dict.get(word)
+                        match_dict[word] = frequency + 1
+                    else:
+                        match_dict[word] = 1
+                    t = 0
+                    w = len(word)
+                    slice = text[0:start_index] + text[start_index+w+1:s]
+                    text = slice
+                    i = start_index-1
+            else:
+                t = (d * t + ord(text[i]))
+        elif text[i] is " ":
+            t = 0
+            start_index = i
+        elif t == 0:
+            t = (d * t + ord(text[i]))
         else:
-            if text[current_index-1] == " " and text[current_index+s] == " ":
-                slice = text[0:current_index-1] + text[current_index+s:t]
-                text = slice
-                sum+=1
-    return text
+            while True:
+                if i >= s-1:
+                    i = s+1
+                    break
+                elif text[i] != " ":
+                    i+=1
+                else:
+                    start_index = i+1
+                    t = 0
+                    break
+        i += 1
+    return text, match_dict.keys(), match_dict.values()
 
+def wordcounter(text, wordlist): #CALL this method to count word(positive, negative and neutral
+    word, frequency = multiple_pattern_matching_rabin_karp(text, wordlist, 256)
+    word = list(word)
+    frequency = list(frequency)
+    return word, frequency
 
-def removeStopWord(stopword, text, list, frequency, stop_word):
-    s = len(stopword)
-    t = len(text)
-    sum = 0
-    for i in range(len(list)):
-        current_index = int(list[i])
-        if current_index == 0:
-            if text[current_index+s] == " ":
-                slice = text[s+1:t]
-                text = slice
-                sum+=1
-        elif current_index + s == t:
-            if text[current_index-1] == " ":
-                slice = text[0:current_index-1]
-                text = slice
-                sum+=1
-        else:
-            if text[current_index-1] == " " and text[current_index+s] == " ":
-                slice = text[0:current_index-1] + text[current_index+s:t]
-                text = slice
-                sum+=1
-    if sum != 0:
-        frequency.append(sum)
-        stop_word.append(stopword)
-    return text
-
-def checkstopword(string):
+def check_stopword(string):
     string = re.sub("[”!@#$:.,()*&^%{}\[\]?“\"/;<>_+=`~]", " ", string)  # remove all punctuation except -
     string = re.sub("(\s+-)", " ", string)
     string = re.sub("(-\s+)", " ", string)
     string = re.sub("(^-)|(-$)", "", string)
-    dashList = search(string, "-", 256, 999937)  # use back search method to search for dash in string
-    string = removeDash(string, dashList)  #additional remove dash method
-    string = re.sub("\s{1,}", " ", string)  #replace 2 or more whitespace to 1 whitespace
+    string = re.sub("\s{1,}", " ", string)  # replace 2 or more whitespace to 1 whitespace
+    string = re.sub("^\s|\s$", "", string)
     string = string.lower()  # change the string to lowercase for comparing
-    file = open(r"stop word.txt", "r")  #NEED to change directory
-    stop_word = []
-    frequency = []
-    for line in file:
-        stopword = re.sub("\s{1,}", "", line)  #because reading the line, so i need to remove whitespace behind
-        result = search(string, stopword, 256, 999937)  #search for the word and return list
-        result.reverse()  #because removing word will cause the word index to change, so i remove the word at behind first to avoidremoving wrong word
-        string = removeStopWord(stopword, string, result, frequency, stop_word)  #remove stopword
-    return string, stop_word, frequency
-
-
-def wordcount(word, text, list, word_list, frequency):
-    s = len(word)
-    t = len(text)
-    sum = 0
-    for i in range(len(list)):
-        current_index = int(list[i])
-        if current_index == 0:
-            if text[current_index+s] == " ":
-                sum+=1
-        elif current_index + s == t:
-            if text[current_index-1] == " ":
-                sum+=1
-        else:
-            if text[current_index-1] == " " and text[current_index+s] == " ":
-                sum+=1
-    if sum != 0:
-        frequency.append(sum)
-        word_list.append(word)
-    return text
-
-def wordcounter(text, wordlist): #CALL this method to count word(positive, negative and neutral
-    word = []
-    frequency = []
-    for i in range(len(wordlist)):
-        result = search(text, wordlist[i], 256, 999937)
-        wordcount(wordlist[i], text, result, word, frequency)
-    return word, frequency
-
-
-# Given a text string, remove all non-alphanumeric
-# characters (using Unicode definition of alphanumeric).
+    string, s, sf = remove_stopword(stop_word_dict, string, 256)
+    s = list(s)
+    sf = list(sf)
+    return string, s, sf
 
 def stripNonAlphaNum(text):
     import re
@@ -206,12 +236,11 @@ def ndata(text,positive_list):
 
 # est = project.wordcounter(text,obo.positive_word)
 
-def countsentiment(wordlist,positive_list,negative_list):
-    
-    positivecounting = wordcounter(wordlist,positive_list)
+def countsentiment(wordlist):
+    positivecounting = wordcounter(wordlist,positive_dict)
     positivefound,positive_freq = positivecounting[0],positivecounting[1]
     ptotal = counttotal(positive_freq)
-    negativecounting= wordcounter(wordlist,negative_list)
+    negativecounting= wordcounter(wordlist,negative_dict)
     negativefound,negative_freq = negativecounting[0],negativecounting[1]
     ntotal = counttotal(negative_freq)
     total = ptotal+ntotal
@@ -220,18 +249,41 @@ def countsentiment(wordlist,positive_list,negative_list):
     print(positive_freq,"Frequency of positive value: ",ptotal)
     print("Negative value found:",negativefound)
     print(negative_freq,"Frequency of negative vlaue: ",ntotal)
-    print("The total word of neutral word count: ",neutral)
+    # print("The total word of neutral word count: ",neutral)
     positivesense = (ptotal/total)*100
     negativesense = (ntotal/total)*100*(-1)
     # neutralsense = (neutral/total)*100
     finalscore = positivesense+negativesense
-    print(positivesense,negativesense)
+    # print(positivesense,negativesense)
     typelist=['Positive word','Negative word','Neutral word']
     freq = [ptotal,ntotal,neutral,total]
     scorelist = ["POSITIVE SCORE","NEGATIVE SCORE","FINAL SCORE"]
     score = [positivesense,negativesense,finalscore]
-    
-    return typelist,freq,scorelist,score
+    print(score[0],score[1])
+    return score[2]
+    # return positivesense,negativesense
+
+def pie(wordlist):
+    positivecounting = wordcounter(wordlist,positive_dict)
+    positivefound,positive_freq = positivecounting[0],positivecounting[1]
+    print(positivefound,positive_freq)
+    ptotal = counttotal(positive_freq)
+    negativecounting= wordcounter(wordlist,negative_dict)
+    negativefound,negative_freq = negativecounting[0],negativecounting[1]
+    print(negativefound, negative_freq)
+    ntotal = counttotal(negative_freq)
+    neutral = len(wordlist)-ptotal-ntotal
+    return ptotal,ntotal,neutral
+
+
+def positive(wordlist):
+    positivecounting = wordcounter(wordlist, positive_dict)
+    positivefound, positive_freq = positivecounting[0], positivecounting[1]
+    ptotal = counttotal(positive_freq)
+    negativecounting= wordcounter(wordlist,negative_dict)
+    negativefound,negative_freq = negativecounting[0],negativecounting[1]
+    ntotal = counttotal(negative_freq)
+    return ptotal,ntotal,positivefound,positive_freq,negativefound,negative_freq
 
 def processpositive(positive):
     sentence = positive.replace(' ','')

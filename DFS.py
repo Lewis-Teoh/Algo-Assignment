@@ -4,7 +4,8 @@ from geopy.distance import geodesic
 from flask import Flask, render_template, request
 import decimal
 import plot_map
-from wordfreq import inspect
+import wordfreq
+
 
 
 app = Flask(__name__)
@@ -18,17 +19,24 @@ class Graph:
         self.graph = defaultdict(list)
         self.best_distance=[]
         self.path_travel = []
-        self.dictionary = {'Malaysia': 0,
-                           'Singapore': 1,
-                           'Indonesia': 2,
-                           'Hong Kong': 3,
-                           'Australia': 4,
-                           'Beijing': 5,
-                           'Taiwan': 6,
-                           'Japan': 7,
-                           'Brunei': 8,
-                           'Thailand': 9}
+        self.dictionary = {'malaysia': 0,
+                           'singapore': 1,
+                           'indonesia': 2,
+                           'hongkong': 3,
+                           'australia': 4,
+                           'china': 5,
+                           'taiwan': 6,
+                           'japan': 7,
+                           'brunei': 8,
+                           'thailand': 9}
+        #number list
         self.best_route_country = []
+        self.route = []
+        #country name list
+        self.best_route_country_name = []
+        self.route = []
+        self.transit= []
+        self.transit_temp= []
 
 
     def addEdge(self, u, v):
@@ -138,22 +146,91 @@ class Graph:
             for k,v in self.dictionary.items():
                 if country==k:
                     self.best_route_country.append(v)
+                    # self.best_route_country_name.append(k)
 
         return self.best_route_country
 
     def draw_dynamic_map(self):
         plot_map.plot_dynamic_map(self.best_route_country)
 
+    #initial word file
+    # def initialize_file(self):
+        # initialize()
+        # for i in range(len(self.path_travel)):
+        #     self.route.append(self.path_travel[i][1].split(' > '))
+        #
+        # print(self.route)
+        # for i in range(len(self.route)):
+        #     for j in range(1,len(self.route[i])):
+        #         self.transit.append(self.route[i][j])
+
+            # print("Transit :", self.transit)
+            # # print("Transit :" , self.transit)
+        # print(self.route)
+
+    def find_transit(self):
+        distance = []
+        result =[]
+        longest = self.path_travel[len(self.path_travel)-1][0]
+        fenmu= self.path_travel[len(self.path_travel)-1][0]-self.path_travel[0][0]
+
+        for i in range(len(self.path_travel)):
+
+            temp = []
+            self.route.append(self.path_travel[i][1].split(' > '))
+            temp.append(longest)
+            temp.append(self.path_travel[i][0])
+            distance.append(temp)
+            if distance[i][0] == distance[i][1]:
+                result.append(0)
+            else:
+                final = (distance[i][0] - distance[i][1]) / fenmu
+                result.append(final)
+
+        print(distance)
+        print("Result:",result)
+
+        # print('route', route)
+        for i in range(len(self.route)):
+            self.route[i].remove('malaysia')
+        print('routedeleted', self.route)
+
+        sentimenscore = []
+        for i in range(len(self.route)):
+            num = len(self.route[i])
+            # temp=
+            sum = 0
+            for item in self.route[i]:
+                # print("this is the word ",wordfreq.get_nation(item))
+                sum += wordfreq.get_nation(item)
+                # print("sum :",sum )
+            sum = sum/num
+            # temp = sum(temp)
+            sentimenscore.append(sum)
+
+        print(sentimenscore)
+
+        score = []
+        for i in range(len(self.path_travel)):
+            temp = (result[i]*70)+(((sentimenscore[i]+100)/200)*30)
+            score.append(temp)
+
+        print(score)
+        return score
+
 @app.route('/', methods=['GET', 'POST'])
 def algo():
     if request.method == 'POST':
+
         destination = request.form['destination']
         g = Graph(15)
         print(g.printAllPaths(0, int(destination)))
         g.sortDistances()
+        # g.initialize_file()
         g.get_best_route_distance()
         g.get_best_route()
-        g.draw_dynamic_map()
+        g.find_transit()
+        # g.draw_dynamic_map()
         # return render_template("myResult.html", path_travel=g.path_travel)
         return render_template('myMap.html', airports=get_airport_names(), path_travel=g.path_travel)
     else:
