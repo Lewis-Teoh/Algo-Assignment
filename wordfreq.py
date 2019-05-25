@@ -108,12 +108,12 @@ def plotting(text):
 
 if __name__ == "__main__":
 
-    # get_nation("japan")
-    china = open("australia.txt","r")    #change the name
-    china = china.read()
-    result = obo.check_stopword(china)
-    freq = obo.pie(result[0])
-    piepie(['Positive Word','Negative Word','Neutral Word'],freq,'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/PieAustralia')    #change h
+    get_nation("taiwan")
+    # china = open("australia.txt","r")    #change the name
+    # china = china.read()
+    # result = obo.check_stopword(china)
+    # freq = obo.pie(result[0])
+    # piepie(['Positive Word','Negative Word','Neutral Word'],freq,'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/PieAustralia')    #change h
     # plotlj(result[1], result[2],'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/SChina')
     # positivecounting = obo.wordcounter(result[0], obo.positive_dict)
     # plotlj(positivecounting[0], positivecounting[1],'C:/Users/lewis/PycharmProjects/AlgoAssignment/graph/PChina')

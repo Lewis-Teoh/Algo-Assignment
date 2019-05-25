@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'
+            async></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='design.css') }}">
 
 
@@ -16,68 +18,74 @@
 
 <body>
 
-<div class="jumbotron jumbotron-fluid" style="background:#C0C0C0" >
-<h1 class="display-4 text-center">Find best flight</h1>
+<div class="jumbotron jumbotron-fluid" style="background:#C0C0C0">
+    <h1 class="display-4 text-center">Find best flight</h1>
     <p class="lead text-center">Algo assignment by group tutorial 12</p>
 </div>
 
 <div class="container">
-<div>
+    <div>
 
-    <iframe id="dynamic_map" class="embed-responsive-item" width="100%" height="720" frameborder="0" style="border:0 "
-            src="{{ url_for('static', filename='dynamic_map.html', _=current_time ) }}"></iframe>
-</div>
-
-<div>
-    <table class="table table-striped">
-
-        <thead>
-        <tr>
-            <th scope="col">Ways</th>
-            <th scope="col">Route</th>
-            <th scope="col">Distance (km)</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for key, value in path_travel %}
-        <tr id="{{ loop.index }}">
-
-            <td> {{ loop.index }}</td>
-            <td> {{ value }}</td>
-            <td> {{ key }}</td>
-        </tr>
-        {% endfor %}
-        <tbody>
-    </table>
-</div>
-
-<div class="jumbotron">
-    <h3>Select your destination</h3>
-<form class="mt-3 mb-3" method="POST" action="/">
-    <div class="form-group">
-        <label>From :</label>
-        <input class="form-control"
-               placeholder="Kuala Lumpur International Airport 2(KLIA2)" disabled>
+        <iframe id="dynamic_map" class="embed-responsive-item" width="100%" height="720" frameborder="0"
+                style="border:0 "
+                src="{{ url_for('static', filename='dynamic_map.html', _=current_time ) }}"></iframe>
     </div>
-    <div class="form-group">
-        <label>To your destination:</label>
-        <select class="form-control" name="destination">
-            {% for airport in airports %}
-            <option value={{loop.index}}>{{airport}}</option>
+    <div>
+        <p>
+            $$ Score = {\left ( \frac{ longest\, distance - distance }{ longest\, distance - shortest\, distance} \right
+            )\times 70 +\left ( \frac{political\, sentiment\, results+100}{200}\times30 \right ) }.$$
+        </p>
+    </div>
+    <div>
+        <table class="table table-striped">
+
+            <thead>
+            <tr>
+                <th scope="col">Ways</th>
+                <th scope="col">Route</th>
+                <th scope="col">Distance (km)</th>
+                <th scope="col">Score</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+            <tr id="{{ loop.index }}">
+
+                <td> {{ loop.index }}</td>
+                <td> {{ item.route }}</td>
+                <td> {{ item.distance }}</td>
+                <td> {{ item.score }}</td>
+            </tr>
             {% endfor %}
-        </select>
+            <tbody>
+        </table>
     </div>
 
-    <button id="submit" type="submit" class="btn btn-primary">Submit
-    </button>
-</form>
-</div>
+    <div class="jumbotron">
+        <h3>Select your destination</h3>
+        <form class="mt-3 mb-3" method="POST" action="/">
+            <div class="form-group">
+                <label>From :</label>
+                <input class="form-control"
+                       placeholder="Kuala Lumpur International Airport 2(KLIA2)" disabled>
+            </div>
+            <div class="form-group">
+                <label>To your destination:</label>
+                <select class="form-control" name="destination">
+                    {% for airport in airports %}
+                    <option value={{loop.index}}>{{airport}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button id="submit" type="submit" class="btn btn-primary">Submit
+            </button>
+        </form>
+    </div>
 
 
-
-
-{% for key, value in path_travel %}
-<script>
+    {% for item in items %}
+    <script>
     $("#{{ loop.index }}").click(function(){
             var index = {{ loop.index }};
            $.post(
@@ -87,16 +95,15 @@
                 alert("success");
            });
      });
-
-</script>
-{% endfor %}
+    </script>
+    {% endfor %}
 </div>
 <div class="footer text-center" style="background-color:#C0C0C0">
-  <h4>
-    &copy2019 FC Sit Group. Your usage of FC Sit Flight Planner indicates that
-    you agree to be bound by our Terms and Conditions, Terms of Use and Privacy
-    Policy. This website is owned and operated by FC Sit Group.
-  </h4>
+    <h4>
+        &copy2019 FC Sit Group. Your usage of FC Sit Flight Planner indicates that
+        you agree to be bound by our Terms and Conditions, Terms of Use and Privacy
+        Policy. This website is owned and operated by FC Sit Group.
+    </h4>
 </div>
 </body>
 

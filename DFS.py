@@ -8,6 +8,7 @@ import wordfreq
 
 
 
+
 app = Flask(__name__)
 
 
@@ -37,6 +38,8 @@ class Graph:
         self.route = []
         self.transit= []
         self.transit_temp= []
+        #kepp items dictionary
+        self.items = []
 
 
     def addEdge(self, u, v):
@@ -214,9 +217,21 @@ class Graph:
         for i in range(len(self.path_travel)):
             temp = (result[i]*70)+(((sentimenscore[i]+100)/200)*30)
             score.append(temp)
+            self.path_travel[i].append(round(score[i],2))
 
-        print(score)
         return score
+
+    def save_item(self):
+
+        for i in range(len(self.path_travel)):
+            an_item = dict(distance =self.path_travel[i][0] , route=self.path_travel[i][1] , score=self.path_travel[i][2])
+            self.items.append(an_item)
+
+        print(self.items)
+        return self.items
+
+    # def route(self):
+    #     return self.path_travel[0][]
 
 @app.route('/', methods=['GET', 'POST'])
 def algo():
@@ -226,22 +241,30 @@ def algo():
         g = Graph(15)
         print(g.printAllPaths(0, int(destination)))
         g.sortDistances()
+
         # g.initialize_file()
         g.get_best_route_distance()
         g.get_best_route()
         g.find_transit()
-        # g.draw_dynamic_map()
-        # return render_template("myResult.html", path_travel=g.path_travel)
-        return render_template('myResult.html', airports=get_airport_names(), path_travel=g.path_travel)
+        g.save_item()
+        g.draw_dynamic_map()
+        # route = g.route[0][0]
+        # print("route :",route)
+        return render_template('myResult.html', airports=get_airport_names(), items=g.save_item())
     else:
         return render_template('myMap.html', airports=get_airport_names(),)
 
-
 @app.route('/serviceidlookup', methods=["GET", "POST"])
-def serviceidlookup():
-    pyindex = request.form.get('pyindex')
-    # print ('index',pyindex)
-    return render_template('myMap.html', airports=get_airport_names() )
+def serviceidlookup(self):
+    if request.method == 'POST':
+        pyindex = request.form.get('pyindex')
+        print('index', pyindex)
+
+        # if pyindex is not None:
+        #     for i in range(len())
+    return render_template('myMap.html', airports=get_airport_names())
+
+
 
 def get_airport_names():
     airport_list = []

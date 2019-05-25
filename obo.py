@@ -1,10 +1,10 @@
 # obo.py
 from urllib.request import urlopen
-import obo 
+import obo
 import plotly
 import plotly.plotly as py
-import plotly.graph_objs as go 
-import os 
+import plotly.graph_objs as go
+import os
 import time
 from shutil import copyfile
 import re
@@ -40,7 +40,7 @@ negative_word = negative.read().split(',') #list of negative word
 negative_dict = multiple_pattern_hashing_rabin_karp(negative_word, 256)
 
 #trasforming stop word to a dict for checking
-file = open(r"C:\Users\ASUS\PycharmProjects\Algo-Assignment-algorithm\stop word.txt", "r")  # NEED to change directory
+file = open(r"C:\Users\lewis\PycharmProjects\Algo-Assignment\stop word.txt", "r")  # NEED to change directory
 stop_word = []
 for line in file:
     stopword = re.sub("\s{1,}", "", line)  #because reading the line, so i need to remove whitespace behind
@@ -195,7 +195,7 @@ def sortdict(freqdict):
     aux.sort()
     # print(aux) #list
     return aux
-    
+
 def worddict(string):
     # wordlist = string.split()
     wordfreq = []
@@ -207,7 +207,7 @@ def worddict(string):
 def removeStopword(wordlist, stopwords):
     # stopwordmet = []
     return [w for w in wordlist if w not in stopwords]
- 
+
 def countword(wordfile,wordlist):
     element = []
     count = []
@@ -227,11 +227,11 @@ def counttotal(listword):
 
 
 def pdata(text,positive_list):
-    result = wordcounter(text,positive_word)    
+    result = wordcounter(text,positive_word)
     return result
 
 def ndata(text,positive_list):
-    result = wordcounter(text,negative_word)    
+    result = wordcounter(text,negative_word)
     return result
 
 # est = project.wordcounter(text,obo.positive_word)
@@ -296,7 +296,7 @@ def processnegative(negative):
     sentence = negative.replace(' ','')
     sentence = ''.join(sentence.split())
     sentence = sentence.lower().split(',')
-    return sentence 
+    return sentence
 
 if __name__ == "__main__":
     a = 34.56
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     print(type(a))
     print(type(b))
     print(a+b, type(a+b))
-    
+
 
     
     
